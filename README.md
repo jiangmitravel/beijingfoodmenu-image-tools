@@ -3,6 +3,7 @@
 A powerful batch image processing tool designed for optimizing food photography and restaurant menu images. Pure HTML/CSS/JavaScript solution - works entirely in your browser.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Live Demo](https://img.shields.io/badge/demo-online-green.svg)](https://jiangmitravel.github.io/beijingfoodmenu-image-tools/)
 
 ## 🌟 Features
 
@@ -43,10 +44,16 @@ This tool was created to support [beijingfoodmenu.com](https://www.beijingfoodme
 
 ## 🚀 Quick Start
 
-### Online Use
+### 🌐 Online Demo (Recommended)
 
-1. **Visit GitHub Repository**: [https://github.com/jiangmitravel/beijingfoodmenu-image-tools](https://github.com/jiangmitravel/beijingfoodmenu-image-tools)
-2. **Download**: Click the green "Code" button → Download ZIP
+**Try it now**: [https://jiangmitravel.github.io/beijingfoodmenu-image-tools/](https://jiangmitravel.github.io/beijingfoodmenu-image-tools/)
+
+No installation required - works directly in your browser!
+
+### 💾 Local Use
+
+1. **Download**: Click the green "Code" button → Download ZIP
+2. **Extract** and open `index.html` in any modern browser
 
 
 ### How to Use
