@@ -1,15 +1,21 @@
 #!/bin/bash
 
 # Beijing Food Menu Image Tools - Build All Platforms
-# Usage: ./build-all.sh [version]
-
-VERSION=${1:-"2.0.0"}
-
-echo "🚀 Building all platforms for version $VERSION"
-echo ""
+set -e
 
 # Get script directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$SCRIPT_DIR/.."
+
+# Read version from config.json
+if command -v jq &> /dev/null; then
+    VERSION=$(jq -r '.version' "$SCRIPT_DIR/config.json")
+else
+    VERSION="1.1.0"
+fi
+
+echo "🚀 Building all platforms for version $VERSION"
+echo ""
 
 # Build Chrome
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

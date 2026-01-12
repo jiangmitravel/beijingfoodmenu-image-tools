@@ -6,7 +6,13 @@
 set -e  # Exit on error
 
 PLATFORM=$1
-VERSION=${2:-"2.0.0"}
+# Read version from config.json if not provided
+if command -v jq &> /dev/null; then
+    DEFAULT_VERSION=$(jq -r '.version' "$(dirname "$0")/config.json" 2>/dev/null || echo "1.1.0")
+else
+    DEFAULT_VERSION="1.1.0"
+fi
+VERSION=${2:-"$DEFAULT_VERSION"}
 
 # Colors for output
 RED='\033[0;31m'
