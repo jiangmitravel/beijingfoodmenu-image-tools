@@ -1,19 +1,26 @@
-# 工具截图
+# Extension Screenshots
 
-此目录用于存放工具界面截图和使用演示。
+This directory contains screenshots of the Chrome Extension popup interface.
 
-## 当前截图:
+## Extension Popup Screenshots
 
-1. **main-interface.png** - 主界面展示(上传区域和设置面板)
-2. **usage-demo.png** - 使用演示(固定宽度模式 + ZIP 下载)
+1. **extension-empty-state.png** - Initial state with upload button
+2. **extension-image-list.png** - Image gallery with edit/delete controls
+3. **extension-settings.png** - Processing settings and options
 
-## 截图说明:
+## Chrome Web Store Promotional Images
 
-- **分辨率**: 适配网页展示
-- **格式**: PNG (保持清晰度)
-- **内容**: 展示真实的使用场景
-- **示例**: 使用实际的图片处理效果
+Located in `chrome-store/` subdirectory:
+
+### Standard Screenshots (1280x800)
+- `screenshot_1_main_interface_1280x800.png` - Main interface overview
+- `screenshot_2_settings_panel_1280x800.png` - Settings panel details
+- `screenshot_3_preview_download_1280x800.png` - Preview and processing
+
+### Promotional Tiles
+- `promo_small_440x280.png` - Small promotional tile (440x280)
+- `promo_large_1400x560.png` - Large promotional banner (1400x560)
 
 ---
 
-这些截图用于 GitHub README 展示,帮助用户快速了解工具功能。
+**Note**: All promotional images (promo_*.png) are AI-generated and optimized for Chrome Web Store submission.

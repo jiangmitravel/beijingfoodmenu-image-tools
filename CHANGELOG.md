@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-01-13
+
+### Added
+- **Advanced Cropping Tool**: Integrated Cropper.js for professional image cropping
+  - Free-form cropping with drag-and-resize
+  - Preset aspect ratios (1:1, 4:3, 16:9, 3:2)
+  - Real-time preview
+  - High-quality output
+- **Enhanced Image Filtering**: Improved image extraction from web pages
+  - Minimum size filter increased to 200×200px
+  - Smart icon/logo detection and exclusion
+  - Image metadata support (width, height, alt text)
+  - Better duplicate detection
+
+### Changed
+- Edit button now opens advanced cropper instead of basic editor
+- Image extraction returns metadata objects instead of URLs
+- Package size increased to 70KB (added Cropper.js library)
+
+### Technical
+- Added Cropper.js v1.6.1 (37KB + 3.7KB CSS)
+- Updated background.js image extraction logic
+- Enhanced popup.js with cropper integration
+- Backward compatible with old image format
+
 ## [1.1.0] - 2026-01-12
 
 ### Added

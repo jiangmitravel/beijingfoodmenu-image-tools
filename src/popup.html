@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="no-referrer">
     <title>Batch Image Processor</title>
+    <link rel="stylesheet" href="libs/cropper.min.css">
     <style>
         body {
             width: 420px;
@@ -472,7 +473,35 @@
         </div>
     </div>
 
+    <!-- Crop Modal -->
+    <div id="cropModal" class="modal" style="display:none">
+        <div class="modal-content" style="max-width: 600px;">
+            <h3 style="margin-top: 0;">Crop Image</h3>
+
+            <!-- Crop Container -->
+            <div style="max-height: 400px; overflow: hidden; background: #000;">
+                <img id="cropImage" style="max-width: 100%; display: block;">
+            </div>
+
+            <!-- Aspect Ratio Controls -->
+            <div style="margin: 15px 0; display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="tool-btn" id="cropFree">Free</button>
+                <button class="tool-btn" id="crop1-1">1:1</button>
+                <button class="tool-btn" id="crop4-3">4:3</button>
+                <button class="tool-btn" id="crop16-9">16:9</button>
+                <button class="tool-btn" id="crop3-2">3:2</button>
+            </div>
+
+            <!-- Actions -->
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="tool-btn" id="cancelCrop">Cancel</button>
+                <button class="tool-btn save-btn" id="applyCrop">✓ Apply Crop</button>
+            </div>
+        </div>
+    </div>
+
     <script src="libs/jszip.min.js"></script>
+    <script src="libs/cropper.min.js"></script>
     <script src="popup.js"></script>
 </body>
 

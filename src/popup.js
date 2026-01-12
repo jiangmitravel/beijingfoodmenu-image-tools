@@ -4,8 +4,9 @@
 let storedImages = [];
 let currentEditIndex = -1;
 let editCanvas = document.getElementById('editorCanvas');
-let editCtx = editCanvas.getContext('2d');
+let editCtx = editCanvas ? editCanvas.getContext('2d') : null;
 let currentEditImage = null;
+let cropper = null; // Cropper.js instance
 
 // --- ICONS ---
 const SRC_EDIT = "data:image/svg+xml;charset=utf-8,%3Csvg%20viewBox%3D%220%200%2024%2024%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22white%22%3E%3Cpath%20d%3D%22M3%2017.25V21h3.75L17.81%209.94l-3.75-3.75L3%2017.25zM20.71%207.04c.39-.39.39-1.02%200-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41%200l-1.83%201.83%203.75%203.75%201.83-1.83z%22%2F%3E%3C%2Fsvg%3E";
@@ -32,8 +33,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         chrome.storage.local.remove('selectedImageUrl');
     }
     if (data.pageImages && data.pageImages.length) {
-        data.pageImages.forEach(url => {
-            if (!isDuplicate(url)) storedImages.push({ url, name: 'batch_image' });
+        data.pageImages.forEach(imgData => {
+            // Support both old format (string) and new format (object)
+            const url = typeof imgData === 'string' ? imgData : imgData.url;
+            const width = typeof imgData === 'object' ? imgData.width : null;
+            const height = typeof imgData === 'object' ? imgData.height : null;
+
+            if (!isDuplicate(url)) {
+                storedImages.push({
+                    url,
+                    name: 'batch_image',
+                    width,
+                    height
+                });
+            }
         });
         isDirty = true;
         chrome.storage.local.remove('pageImages');
@@ -47,6 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupProcessingListeners();
     setupUploadListener();
     setupGalleryDelegation();
+    setupCropperListeners(); // New: Cropper functionality
 });
 
 function isDuplicate(url) {
@@ -109,7 +123,7 @@ function setupGalleryDelegation() {
         const idx = parseInt(btn.dataset.index);
 
         if (btn.classList.contains('edit-btn')) {
-            openEditor(idx);
+            openCropper(idx); // Use new cropper instead of old editor
         } else if (btn.classList.contains('delete-btn')) {
             deleteImage(idx);
         }
@@ -392,4 +406,95 @@ function toggleResizeInput() {
     const isFixed = document.querySelector('input[name="resize"][value="fixed"]').checked;
     document.getElementById('resizePct').style.display = isFixed ? 'none' : 'block';
     document.getElementById('resizeFixed').style.display = isFixed ? 'block' : 'none';
+}
+
+// ===== CROPPER FUNCTIONALITY =====
+
+let currentCropIndex = -1;
+
+function setupCropperListeners() {
+    // Cancel crop
+    document.getElementById('cancelCrop').onclick = () => {
+        closeCropper();
+    };
+
+    // Apply crop
+    document.getElementById('applyCrop').onclick = () => {
+        if (!cropper) return;
+
+        const canvas = cropper.getCroppedCanvas();
+        if (!canvas) return;
+
+        const croppedUrl = canvas.toDataURL('image/png');
+        storedImages[currentCropIndex].url = croppedUrl;
+        storedImages[currentCropIndex].cropped = true;
+
+        saveImages();
+        renderGallery();
+        closeCropper();
+    };
+
+    // Aspect ratio buttons
+    document.getElementById('cropFree').onclick = () => {
+        if (cropper) cropper.setAspectRatio(NaN);
+    };
+
+    document.getElementById('crop1-1').onclick = () => {
+        if (cropper) cropper.setAspectRatio(1);
+    };
+
+    document.getElementById('crop4-3').onclick = () => {
+        if (cropper) cropper.setAspectRatio(4 / 3);
+    };
+
+    document.getElementById('crop16-9').onclick = () => {
+        if (cropper) cropper.setAspectRatio(16 / 9);
+    };
+
+    document.getElementById('crop3-2').onclick = () => {
+        if (cropper) cropper.setAspectRatio(3 / 2);
+    };
+}
+
+function openCropper(index) {
+    currentCropIndex = index;
+    const imgData = storedImages[index];
+
+    const modal = document.getElementById('cropModal');
+    const image = document.getElementById('cropImage');
+
+    image.src = imgData.url;
+    modal.style.display = 'flex';
+
+    // Destroy existing cropper if any
+    if (cropper) {
+        cropper.destroy();
+        cropper = null;
+    }
+
+    // Wait for image to load
+    image.onload = () => {
+        cropper = new Cropper(image, {
+            aspectRatio: NaN,
+            viewMode: 1,
+            autoCropArea: 0.8,
+            responsive: true,
+            restore: false,
+            guides: true,
+            center: true,
+            highlight: true,
+            cropBoxMovable: true,
+            cropBoxResizable: true,
+            toggleDragModeOnDblclick: false
+        });
+    };
+}
+
+function closeCropper() {
+    if (cropper) {
+        cropper.destroy();
+        cropper = null;
+    }
+    document.getElementById('cropModal').style.display = 'none';
+    currentCropIndex = -1;
 }
