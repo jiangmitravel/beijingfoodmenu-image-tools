@@ -40,14 +40,14 @@ Or build from source (see [BUILD.md](BUILD.md) for instructions).
 
 ### Extension Popup Interface
 
-![Empty State](docs/screenshots/extension-empty-state.png)
-*Initial upload interface*
+![Initial Interface](docs/screenshots/chrome-store/screenshot_1_1280x800.png)
+*Initial upload interface with settings panel*
 
-![Image Gallery](docs/screenshots/extension-image-list.png)
-*Image list with edit/delete controls*
+![Image Gallery](docs/screenshots/chrome-store/screenshot_2_1280x800.png)
+*Image gallery with batch processing controls*
 
-![Settings Panel](docs/screenshots/extension-settings.png)
-*Processing settings and options*
+![Settings Panel](docs/screenshots/chrome-store/screenshot_3_1280x800.png)
+*Detailed processing settings and options*
 
 ## 🛠️ Technical Details
 
