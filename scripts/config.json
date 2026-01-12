@@ -1,0 +1,35 @@
+{
+    "platforms": {
+        "chrome": {
+            "PLATFORM_NAME": "Chrome",
+            "PLATFORM_FULL": "Chrome Extension",
+            "EXTENSION_NAME": "Batch Image Processor",
+            "SHORT_NAME": "Image Processor",
+            "BROWSER_NAME": "Chrome browser",
+            "STORE_NAME": "Chrome Web Store",
+            "STORE_POLICY": "Chrome Web Store Developer Program Policies",
+            "STORE_URL": "chrome://extensions/",
+            "HOMEPAGE_URL": "https://jiangmitravel.github.io/beijingfoodmenu-image-tools/",
+            "output_dir": "build/chrome"
+        },
+        "edge": {
+            "PLATFORM_NAME": "Edge",
+            "PLATFORM_FULL": "Edge Extension",
+            "EXTENSION_NAME": "Batch Image Processor",
+            "SHORT_NAME": "Image Processor",
+            "BROWSER_NAME": "Edge browser",
+            "STORE_NAME": "Microsoft Edge Add-ons",
+            "STORE_POLICY": "Microsoft Edge Add-ons Developer Policies",
+            "STORE_URL": "edge://extensions/",
+            "HOMEPAGE_URL": "https://jiangmitravel.github.io/beijingfoodmenu-image-tools/",
+            "output_dir": "build/edge"
+        }
+    },
+    "version": "1.0.0",
+    "exclude_patterns": [
+        "*.DS_Store",
+        "*.git*",
+        ".gitignore",
+        "*.template.*"
+    ]
+}

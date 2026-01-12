@@ -56,7 +56,8 @@ desktop.ini
 *.bak
 *.bak*
 
-# Project specific
-chrome-extension/
+# Project specific - Build System
+build/
+*.zip
 docs/examples/*
 !docs/examples/.gitkeep

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <title>Batch Image Processor</title>
+    <style>
+        body {
+            width: 420px;
+            padding: 0;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #333;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px;
+            color: white;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .version {
+            font-size: 10px;
+            opacity: 0.8;
+            margin-top: 4px;
+            display: block;
+        }
+
+        .content {
+            padding: 15px;
+        }
+
+        /* Presets */
+        .presets-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .presets-wrapper label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        #presetSelect {
+            flex: 1;
+            padding: 6px;
+            font-size: 13px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        /* General UI */
+        .setting-group {
+            margin-bottom: 15px;
+        }
+
+        .setting-label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input[type="number"],
+        select,
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 10px;
+            font-size: 12px;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        /* Gallery */
+        .gallery-section {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 15px;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .gallery-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .clear-btn {
+            color: #ff4444;
+            border: none;
+            background: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .grid-item {
+            position: relative;
+            aspect-ratio: 1;
+            background: #fff;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+
+        .grid-item:hover {
+            border-color: #667eea;
+        }
+
+        .grid-item img.thumb {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* OVERLAY: Actions (Bottom) */
+        .grid-actions {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: space-around;
+            padding: 4px 0;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .grid-item:hover .grid-actions {
+            opacity: 1;
+        }
+
+        /* OVERLAY: Dimensions (Top) */
+        .img-dims {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            font-size: 9px;
+            padding: 2px;
+            text-align: center;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        /* BTN STYLES */
+        .action-icon {
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+            padding: 4px;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-icon:hover {
+            opacity: 1;
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        .action-icon img {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Edit Overlay */
+        .editor-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+        }
+
+        .editor-header {
+            padding: 10px;
+            background: #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .editor-canvas-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #333;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .editor-canvas-container canvas {
+            max-width: 100%;
+            max-height: 100%;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .editor-toolbar {
+            padding: 10px;
+            background: #eee;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .tool-btn {
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .tool-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .save-btn {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        /* Main Action */
+        .primary-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .primary-btn:hover {
+            opacity: 0.9;
+        }
+
+        .primary-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status {
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            text-align: center;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .file-input-wrapper {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .upload-label {
+            cursor: pointer;
+            color: #667eea;
+            font-weight: 600;
+            font-size: 13px;
+            border: 1px dashed #667eea;
+            padding: 8px 15px;
+            border-radius: 4px;
+            display: inline-block;
+            width: 80%;
+        }
+
+        .upload-label:hover {
+            background: #f8f9fa;
+        }
+
+        .split-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        .split-input>div {
+            flex: 1;
+        }
+
+        .input-label {
+            font-size: 10px;
+            color: #666;
+            margin-bottom: 2px;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>Batch Image Processor</h1>
+        <span class="version">v1.0</span>
+    </div>
+
+    <div class="content">
+        <!-- Presets -->
+        <div class="presets-wrapper">
+            <label>⚡ Presets:</label>
+            <select id="presetSelect">
+                <option value="custom">Custom Settings</option>
+                <option value="social">Social Media (JPG, 1080px, 85%)</option>
+                <option value="web">Web Thumbnail (WebP, 400px, 75%)</option>
+                <option value="print">High Quality (PNG, Original, 100%)</option>
+            </select>
+        </div>
+
+        <!-- Upload -->
+        <div class="file-input-wrapper">
+            <label class="upload-label">
+                📂 Select from Computer
+                <input type="file" id="fileInput" accept="image/*" multiple style="display: none;">
+            </label>
+        </div>
+
+        <!-- Gallery -->
+        <div class="gallery-section">
+            <div class="gallery-header">
+                <span id="galleryCount">Images: 0</span>
+                <button class="clear-btn" id="clearBtn">Clear All</button>
+            </div>
+            <div id="galleryGrid" class="grid"></div>
+            <div id="emptyState" style="text-align: center; color: #999; font-size: 12px; margin-top: 20px;">
+                No images. Select local files or right-click images on webpage.
+            </div>
+        </div>
+
+        <!-- Filename -->
+        <div class="setting-group">
+            <label class="setting-label">Filename Prefix</label>
+            <input type="text" id="filenamePrefix" placeholder="e.g. food_menu (Default: processed)">
+        </div>
+
+        <!-- Settings -->
+        <div class="setting-group">
+            <label class="setting-label">Quality: <span id="qualVal">80%</span></label>
+            <input type="range" id="quality" min="10" max="100" value="80" style="width: 100%;">
+        </div>
+
+        <div class="setting-group">
+            <label class="setting-label">Resize</label>
+            <div class="radio-group" style="margin-bottom: 5px;">
+                <label><input type="radio" name="resize" value="pct" checked> % Scale</label>
+                <label><input type="radio" name="resize" value="fixed"> Fixed Dimensions</label>
+            </div>
+            <div id="resizePct">
+                <select id="pctSelect">
+                    <option value="50">50%</option>
+                    <option value="75">75%</option>
+                    <option value="100" selected>100% (Original)</option>
+                    <option value="150">150%</option>
+                </select>
+            </div>
+            <div id="resizeFixed" style="display:none;">
+                <div class="split-input">
+                    <div>
+                        <span class="input-label">Max Width (px)</span>
+                        <input type="number" id="fixedWidthVal" placeholder="Auto if empty">
+                    </div>
+                    <div>
+                        <span class="input-label">Max Height (px)</span>
+                        <input type="number" id="fixedHeightVal" placeholder="Auto if empty">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="setting-group">
+            <label class="setting-label">Format</label>
+            <select id="format">
+                <option value="image/jpeg">JPEG</option>
+                <option value="image/png">PNG</option>
+                <option value="image/webp" selected>WebP</option>
+            </select>
+        </div>
+
+        <div class="setting-group">
+            <label class="setting-label">Privacy</label>
+            <div style="font-size: 12px; display: flex; align-items: center; gap: 6px;">
+                <input type="checkbox" id="removeExif" checked>
+                <label for="removeExif" style="cursor: pointer;">Remove Metadata (EXIF)</label>
+            </div>
+        </div>
+
+        <button id="processBtn" class="primary-btn">Process & Download</button>
+        <div id="status" class="status"></div>
+    </div>
+
+    <!-- Editor Overlay -->
+    <div id="editorOverlay" class="editor-overlay">
+        <div class="editor-header">
+            <span style="font-weight: 600;">Edit Image</span>
+            <button class="tool-btn" id="closeEditor">Cancel</button>
+        </div>
+        <div class="editor-canvas-container">
+            <canvas id="editorCanvas"></canvas>
+        </div>
+        <div class="editor-toolbar">
+            <button class="tool-btn" id="rotateLeft">↺ -90°</button>
+            <button class="tool-btn" id="rotateRight">↻ +90°</button>
+            <button class="tool-btn" id="cropSquare">Square 1:1</button>
+            <button class="tool-btn" id="crop43">4:3</button>
+            <button class="tool-btn save-btn" id="saveEdit">✓ Save Changes</button>
+        </div>
+    </div>
+
+    <script src="libs/jszip.min.js"></script>
+    <script src="popup.js"></script>
+</body>
+
+</html>

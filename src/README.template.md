@@ -1,6 +1,6 @@
 # Batch Image Processor
 
-A powerful, privacy-focused tool for batch image processing, editing, and optimization. Available as a **Web App** and **Browser Extension** (Chrome & Edge).
+A powerful, privacy-focused tool for batch image processing, editing, and optimization. Available as a **Web App** and **{{PLATFORM_FULL}}**.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Live Demo](https://img.shields.io/badge/demo-online-green.svg)](https://jiangmitravel.github.io/beijingfoodmenu-image-tools/)
@@ -16,9 +16,9 @@ A powerful, privacy-focused tool for batch image processing, editing, and optimi
 - **One-Click Presets**: Quickly switch between Social (1080p), Web (WebP), and Print settings.
 - **Built-in Editor**: Crop (Square/4:3) and Rotate images before processing.
 
-## 🧩 Browser Extension Features
+## 🧩 {{PLATFORM_FULL}} Features
 
-The Browser Extension enhances your workflow by allowing you to collect images from anywhere:
+The {{PLATFORM_FULL}} enhances your workflow by allowing you to collect images from anywhere:
 
 - **Bulk Page Grabber**: Right-click -> "Process All Images on Page" to instantly extract all images from a website.
 - **Multi-Tab Collection**: Collect images from different tabs into a single queue.
@@ -30,38 +30,20 @@ The Browser Extension enhances your workflow by allowing you to collect images f
 ### 🌐 Web Version
 [**Launch Web App**](https://jiangmitravel.github.io/beijingfoodmenu-image-tools/) — No installation required. Perfect for local files.
 
-### 🧩 Browser Extension
-- **Chrome**: [Chrome Web Store](https://chrome.google.com/webstore) (Coming soon)
-- **Edge**: [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons) (Coming soon)
-
-Or build from source (see [BUILD.md](BUILD.md) for instructions).
+### 🧩 {{PLATFORM_FULL}}
+1. Download the latest release.
+2. Load "Unpacked Extension" in {{PLATFORM_NAME}} Developer Mode.
+3. Start collecting images!
 
 ## 📸 Screenshots
 
-### Extension Popup Interface
-
-![Empty State](docs/screenshots/extension-empty-state.png)
-*Initial upload interface*
-
-![Image Gallery](docs/screenshots/extension-image-list.png)
-*Image list with edit/delete controls*
-
-![Settings Panel](docs/screenshots/extension-settings.png)
-*Processing settings and options*
+![Main Interface](docs/screenshots/main-interface.png)
 
 ## 🛠️ Technical Details
 
 - **Input Formats**: JPEG, PNG, WebP, BMP, GIF
 - **Output Formats**: JPEG, PNG, WebP
 - **Tech Stack**: Pure HTML/CSS/JavaScript (NO external dependencies besides JSZip).
-- **Multi-Platform**: Single codebase builds for Chrome and Edge using automated build system.
-
-## 🔧 Development
-
-This project uses a **single-source, multi-build** system. See [BUILD.md](BUILD.md) for:
-- Building Chrome and Edge versions
-- Using template variables for platform differences
-- Development workflow and best practices
 
 ## 🏢 Credits
 
