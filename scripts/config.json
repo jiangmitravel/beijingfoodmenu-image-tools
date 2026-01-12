@@ -25,7 +25,7 @@
             "output_dir": "build/edge"
         }
     },
-    "version": "1.0.0",
+    "version": "1.1.0",
     "exclude_patterns": [
         "*.DS_Store",
         "*.git*",

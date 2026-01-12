@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-01-12
+
+### Added
+- **Batch Processing Improvements**: Enhanced error handling for processing multiple images
+- **Progress Indicator**: Real-time progress display showing "Processing X/Y..." during batch operations
+- **CORS Support**: Added `crossOrigin` support for processing images from external sources
+- **Timeout Protection**: 30-second timeout per image to prevent indefinite hanging
+- **Failure Statistics**: Shows success/failure count after batch processing completes
+
+### Fixed
+- Fixed issue where processing would hang when encountering problematic images
+- Improved error handling - failed images are now skipped instead of stopping the entire process
+- Better error messages in console for debugging CORS and loading issues
+
+### Changed
+- Processing button now shows detailed progress instead of generic "Processing..." message
+- Failed images no longer block successful images from being processed
+
 ## [1.0.0] - 2026-01-12
 
 ### Initial Release

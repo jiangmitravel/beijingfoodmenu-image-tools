@@ -1,11 +1,11 @@
 // popup.js - V2.0 (Dimensions + Renaming + IMG Tags)
 
 // --- STATE ---
-let storedImages = []; 
+let storedImages = [];
 let currentEditIndex = -1;
 let editCanvas = document.getElementById('editorCanvas');
 let editCtx = editCanvas.getContext('2d');
-let currentEditImage = null; 
+let currentEditImage = null;
 
 // --- ICONS ---
 const SRC_EDIT = "data:image/svg+xml;charset=utf-8,%3Csvg%20viewBox%3D%220%200%2024%2024%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22white%22%3E%3Cpath%20d%3D%22M3%2017.25V21h3.75L17.81%209.94l-3.75-3.75L3%2017.25zM20.71%207.04c.39-.39.39-1.02%200-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41%200l-1.83%201.83%203.75%203.75%201.83-1.83z%22%2F%3E%3C%2Fsvg%3E";
@@ -61,10 +61,10 @@ function renderGallery() {
     const grid = document.getElementById('galleryGrid');
     const count = document.getElementById('galleryCount');
     const empty = document.getElementById('emptyState');
-    
+
     grid.innerHTML = '';
     count.textContent = `Images: ${storedImages.length}`;
-    
+
     if (storedImages.length === 0) {
         empty.style.display = 'block';
         return;
@@ -95,7 +95,7 @@ function renderGallery() {
             const w = imgEl.naturalWidth;
             const h = imgEl.naturalHeight;
             const dimsEl = document.getElementById(`dims-${idx}`);
-            if(dimsEl) dimsEl.textContent = `${w} x ${h}`;
+            if (dimsEl) dimsEl.textContent = `${w} x ${h}`;
         };
     });
 }
@@ -107,7 +107,7 @@ function setupGalleryDelegation() {
         if (!btn) return;
 
         const idx = parseInt(btn.dataset.index);
-        
+
         if (btn.classList.contains('edit-btn')) {
             openEditor(idx);
         } else if (btn.classList.contains('delete-btn')) {
@@ -126,7 +126,7 @@ function openEditor(idx) {
     currentEditIndex = idx;
     const imgData = storedImages[idx];
     document.getElementById('editorOverlay').style.display = 'flex';
-    
+
     currentEditImage = new Image();
     currentEditImage.onload = () => {
         editCanvas.width = currentEditImage.width;
@@ -144,8 +144,8 @@ function setupEditorListeners() {
     document.getElementById('rotateRight').onclick = () => rotateCanvas(90);
     document.getElementById('rotateLeft').onclick = () => rotateCanvas(-90);
     document.getElementById('cropSquare').onclick = () => cropCanvas(1);
-    document.getElementById('crop43').onclick = () => cropCanvas(4/3);
-    
+    document.getElementById('crop43').onclick = () => cropCanvas(4 / 3);
+
     document.getElementById('saveEdit').onclick = () => {
         const newUrl = editCanvas.toDataURL('image/png');
         storedImages[currentEditIndex].url = newUrl;
@@ -159,7 +159,7 @@ function setupEditorListeners() {
 function rotateCanvas(deg) {
     const temp = document.createElement('canvas');
     const ctx = temp.getContext('2d');
-    
+
     if (Math.abs(deg) === 90) {
         temp.width = editCanvas.height;
         temp.height = editCanvas.width;
@@ -167,11 +167,11 @@ function rotateCanvas(deg) {
         temp.width = editCanvas.width;
         temp.height = editCanvas.height;
     }
-    
-    ctx.translate(temp.width/2, temp.height/2);
+
+    ctx.translate(temp.width / 2, temp.height / 2);
     ctx.rotate(deg * Math.PI / 180);
-    ctx.drawImage(editCanvas, -editCanvas.width/2, -editCanvas.height/2);
-    
+    ctx.drawImage(editCanvas, -editCanvas.width / 2, -editCanvas.height / 2);
+
     editCanvas.width = temp.width;
     editCanvas.height = temp.height;
     editCtx.drawImage(temp, 0, 0);
@@ -181,9 +181,9 @@ function cropCanvas(ratio) {
     const w = editCanvas.width;
     const h = editCanvas.height;
     const currentRatio = w / h;
-    
+
     let cropW, cropH, offsetX, offsetY;
-    
+
     if (currentRatio > ratio) {
         cropH = h;
         cropW = h * ratio;
@@ -195,7 +195,7 @@ function cropCanvas(ratio) {
         offsetX = 0;
         offsetY = (h - cropH) / 2;
     }
-    
+
     const tempData = editCtx.getImageData(offsetX, offsetY, cropW, cropH);
     editCanvas.width = cropW;
     editCanvas.height = cropH;
@@ -232,73 +232,120 @@ function readFile(file) {
 function setupProcessingListeners() {
     document.getElementById('processBtn').onclick = async () => {
         if (!storedImages.length) return alert('No images!');
-        
+
         const btn = document.getElementById('processBtn');
         btn.disabled = true;
-        btn.textContent = 'Processing...';
-        
-        const quality = parseInt(document.getElementById('quality').value) / 100;
-        const format = document.getElementById('format').value;
-        const resizeMode = document.querySelector('input[name="resize"]:checked').value;
-        
-        const prefixInput = document.getElementById('filenamePrefix').value.trim();
-        const prefix = prefixInput || 'processed';
-        
-        const processed = [];
-        
-        for (let i=0; i<storedImages.length; i++) {
-            const img = await processImage(storedImages[i].url, quality, format, resizeMode);
-            const ext = format.split('/')[1];
-            processed.push({ blob: img, name: `${prefix}_${i+1}.${ext}` });
+
+        try {
+            const quality = parseInt(document.getElementById('quality').value) / 100;
+            const format = document.getElementById('format').value;
+            const resizeMode = document.querySelector('input[name="resize"]:checked').value;
+
+            const prefixInput = document.getElementById('filenamePrefix').value.trim();
+            const prefix = prefixInput || 'processed';
+
+            const processed = [];
+            const total = storedImages.length;
+
+            for (let i = 0; i < total; i++) {
+                btn.textContent = `Processing ${i + 1}/${total}...`;
+
+                try {
+                    const img = await processImage(storedImages[i].url, quality, format, resizeMode);
+                    const ext = format.split('/')[1];
+                    processed.push({ blob: img, name: `${prefix}_${i + 1}.${ext}` });
+                } catch (err) {
+                    console.error(`Failed to process image ${i + 1}:`, err);
+                }
+            }
+
+            if (processed.length === 0) {
+                alert('All images failed to process. Please try again.');
+                return;
+            }
+
+            btn.textContent = 'Creating download...';
+
+            if (processed.length > 1) {
+                const zip = new JSZip();
+                processed.forEach(p => zip.file(p.name, p.blob));
+                const content = await zip.generateAsync({ type: "blob" });
+                const url = URL.createObjectURL(content);
+                chrome.downloads.download({ url, filename: `${prefix}_batch.zip`, saveAs: false });
+            } else {
+                const url = URL.createObjectURL(processed[0].blob);
+                chrome.downloads.download({ url, filename: processed[0].name, saveAs: false });
+            }
+
+            if (processed.length < total) {
+                alert(`Processed ${processed.length} of ${total} images. ${total - processed.length} failed.`);
+            }
+
+        } catch (error) {
+            console.error('Processing error:', error);
+            alert('Processing failed: ' + error.message);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Process & Download';
         }
-        
-        if (processed.length > 1) {
-            const zip = new JSZip();
-            processed.forEach(p => zip.file(p.name, p.blob));
-            const content = await zip.generateAsync({type:"blob"});
-            const url = URL.createObjectURL(content);
-            chrome.downloads.download({ url, filename: `${prefix}_batch.zip`, saveAs: false });
-        } else {
-            const url = URL.createObjectURL(processed[0].blob);
-            chrome.downloads.download({ url, filename: processed[0].name, saveAs: false });
-        }
-        
-        btn.disabled = false;
-        btn.textContent = 'Process & Download';
     };
 }
 
 function processImage(url, quality, format, resizeMode) {
-    return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-            let w = img.width, h = img.height;
-            
-            if (resizeMode === 'pct') {
-                const p = parseInt(document.getElementById('pctSelect').value) / 100;
-                w *= p; h *= p;
-            } else {
-                const fw = parseInt(document.getElementById('fixedWidthVal').value);
-                const fh = parseInt(document.getElementById('fixedHeightVal').value);
+    return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+            reject(new Error('Image processing timeout'));
+        }, 30000);
 
-                if (fw && fh) {
-                    const ratio = Math.min(fw / w, fh / h);
-                    w *= ratio;
-                    h *= ratio;
-                } else if (fw) {
-                    h = img.height * (fw / img.width);
-                    w = fw;
-                } else if (fh) {
-                    w = img.width * (fh / img.height);
-                    h = fh;
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+
+        img.onload = () => {
+            try {
+                let w = img.width, h = img.height;
+
+                if (resizeMode === 'pct') {
+                    const p = parseInt(document.getElementById('pctSelect').value) / 100;
+                    w *= p; h *= p;
+                } else {
+                    const fw = parseInt(document.getElementById('fixedWidthVal').value);
+                    const fh = parseInt(document.getElementById('fixedHeightVal').value);
+
+                    if (fw && fh) {
+                        const ratio = Math.min(fw / w, fh / h);
+                        w *= ratio;
+                        h *= ratio;
+                    } else if (fw) {
+                        h = img.height * (fw / img.width);
+                        w = fw;
+                    } else if (fh) {
+                        w = img.width * (fh / img.height);
+                        h = fh;
+                    }
                 }
+
+                const cvs = document.createElement('canvas');
+                cvs.width = w; cvs.height = h;
+                cvs.getContext('2d').drawImage(img, 0, 0, w, h);
+                cvs.toBlob((blob) => {
+                    clearTimeout(timeout);
+                    if (blob) {
+                        resolve(blob);
+                    } else {
+                        reject(new Error('Failed to create blob'));
+                    }
+                }, format, quality);
+            } catch (err) {
+                clearTimeout(timeout);
+                reject(err);
             }
-            
-            const cvs = document.createElement('canvas');
-            cvs.width = w; cvs.height = h;
-            cvs.getContext('2d').drawImage(img, 0, 0, w, h);
-            cvs.toBlob(resolve, format, quality);
         };
+
+        img.onerror = () => {
+            clearTimeout(timeout);
+            reject(new Error('Failed to load image'));
+        };
+
         img.src = url;
     });
 }
@@ -308,15 +355,15 @@ function setupPresetListener() {
     select.addEventListener('change', (e) => {
         const val = e.target.value;
         if (val === 'custom') return;
-        
+
         const p = PRESETS[val];
         document.getElementById('quality').value = p.qual;
         document.getElementById('qualVal').textContent = p.qual + '%';
         document.getElementById('format').value = p.fmt;
-        
+
         const radios = document.getElementsByName('resize');
         for (let r of radios) r.checked = (r.value === p.mode);
-        toggleResizeInput(); 
+        toggleResizeInput();
 
         if (p.mode === 'pct') {
             document.getElementById('pctSelect').value = p.pct;
@@ -328,13 +375,13 @@ function setupPresetListener() {
 
     ['quality', 'fixedWidthVal', 'fixedHeightVal', 'pctSelect'].forEach(id => {
         const el = document.getElementById(id);
-        if(el) el.addEventListener('input', () => select.value = 'custom');
+        if (el) el.addEventListener('input', () => select.value = 'custom');
     });
-    
+
     document.getElementById('quality').addEventListener('input', (e) => {
         document.getElementById('qualVal').textContent = e.target.value + '%';
     });
-    
+
     document.getElementsByName('resize').forEach(r => r.addEventListener('change', () => {
         toggleResizeInput();
         select.value = 'custom';
