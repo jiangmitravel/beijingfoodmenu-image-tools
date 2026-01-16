@@ -7,14 +7,14 @@ A powerful, privacy-focused tool for batch image processing, editing, and optimi
 
 ## 🌟 Key Features
 
-- **Batch Processing**: Process multiple images simultaneously.
-- **Privacy First**: All processing happens entirely in your browser/local device. No data is uploaded to any server.
-- **Smart Resizing**: Percentage-based scaling or fixed width with auto-calculated height.
-- **Format Conversion**: Convert to JPEG, PNG, or WebP.
-- **Flexible Naming**: Custom prefix, suffix, or sequential numbering.
-- **Metadata Removal**: Option to strip EXIF data for privacy.
-- **One-Click Presets**: Quickly switch between Social (1080p), Web (WebP), and Print settings.
-- **Built-in Editor**: Crop images with multiple aspect ratios (Free, 1:1, 4:3, 16:9, 3:2).
+- **Batch Processing**: Process multiple images at once with a single click.
+- **Image Cropping**: Professional crop tool with preset aspect ratios (1:1, 4:3, 16:9, 3:2) and free-form cropping.
+- **Format Conversion**: Convert between JPEG, PNG, and WebP formats.
+- **Smart Resizing**: Scale by percentage (50%, 75%, 100%, 150%) or set custom max width/height.
+- **Quality Control**: Adjust compression quality from 10% to 100%.
+- **Quick Presets**: One-click settings for common use cases (Social Media, Web Thumbnails, High Quality Print).
+- **Privacy Protection**: 100% local processing - images never leave your device. Optional EXIF metadata removal.
+- **Custom File Naming**: Add custom prefix to processed images for easy organization.
 
 ## 🧩 {{PLATFORM_FULL}} Features
 
