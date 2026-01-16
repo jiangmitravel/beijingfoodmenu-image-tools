@@ -5,11 +5,13 @@
   "version": "{{VERSION}}",
   "description": "Professional batch image processing: compress, resize, convert formats. Privacy-first local processing. Grab images from any page.",
   "permissions": [
-    "contextMenus",
-    "downloads",
-    "scripting",
     "storage",
-    "activeTab"
+    "downloads",
+    "activeTab",
+    "scripting",
+    "contextMenus",
+    "tabs",
+    "notifications"
   ],
   "background": {
     "service_worker": "background.js"

@@ -23,62 +23,120 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     } else if (info.menuItemId === "processAllImages") {
         chrome.scripting.executeScript({
             target: { tabId: tab.id },
-            function: extractImagesFromPage
+            func: extractImagesFromPage
+        }, (results) => {
+            if (chrome.runtime.lastError) {
+                console.error('executeScript error:', chrome.runtime.lastError);
+                return;
+            }
+
+            if (results && results[0] && results[0].result) {
+                const images = results[0].result;
+                chrome.storage.local.set({ pageImages: images });
+                console.log(`Found ${images.length} images. User should click extension icon.`);
+            } else {
+                console.log('No images found on this page.');
+            }
         });
     }
 });
 
 // The function injected into the page
-// Extract images with filtering options
-function extractImagesFromPage() {
-    const minSize = 200; // Minimum size for filtering
+// Extract images with filtering options and convert to data URLs
+async function extractImagesFromPage() {
+    const minSize = 200;
     const images = Array.from(document.querySelectorAll('img'))
-        .map(img => ({
-            url: img.src,
-            width: img.naturalWidth,
-            height: img.naturalHeight,
-            alt: img.alt || '',
-            className: img.className || ''
-        }))
         .filter(img => {
-            // Basic size filter
-            if (img.width < minSize || img.height < minSize) return false;
-
-            // Exclude tiny icons
-            if (img.width < 100 && img.height < 100) return false;
-
-            // Exclude common icon/logo patterns
-            const url = img.url.toLowerCase();
+            const w = img.naturalWidth;
+            const h = img.naturalHeight;
+            if (w < minSize || h < minSize) return false;
+            if (w < 100 && h < 100) return false;
+            const url = img.src.toLowerCase();
             if (url.includes('icon') || url.includes('logo') || url.includes('avatar')) {
-                if (img.width < 200 || img.height < 200) return false;
+                if (w < 200 || h < 200) return false;
             }
-
-            // Only http/https/data URLs
-            if (!img.url.startsWith('http') && !img.url.startsWith('data:')) return false;
-
+            if (!img.src.startsWith('http') && !img.src.startsWith('data:')) return false;
             return true;
         });
 
-    // De-duplicate by URL
+    // Convert to data URLs using fetch → blob → FileReader
+    const results = [];
+    for (const img of images) {
+        try {
+            // Data URLs are already good
+            if (img.src.startsWith('data:')) {
+                results.push({
+                    url: img.src,
+                    width: img.naturalWidth,
+                    height: img.naturalHeight,
+                    crossOrigin: false
+                });
+                continue;
+            }
+
+            // Check if same origin
+            const imgUrl = new URL(img.src);
+            const isSameOrigin = imgUrl.origin === window.location.origin;
+
+            if (!isSameOrigin) {
+                // Cross-origin: keep URL and mark it (can download but not edit)
+                console.log('Cross-origin image (download only):', img.src);
+                results.push({
+                    url: img.src,
+                    width: img.naturalWidth,
+                    height: img.naturalHeight,
+                    crossOrigin: true
+                });
+                continue;
+            }
+
+            // Same origin: fetch and convert to data URL (can edit)
+            try {
+                const response = await fetch(img.src);
+                const blob = await response.blob();
+                const dataUrl = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+
+                results.push({
+                    url: dataUrl,
+                    width: img.naturalWidth,
+                    height: img.naturalHeight,
+                    crossOrigin: false
+                });
+            } catch (fetchError) {
+                console.warn('Fetch failed for same-origin image:', img.src);
+                // If fetch fails, treat as cross-origin (download only)
+                results.push({
+                    url: img.src,
+                    width: img.naturalWidth,
+                    height: img.naturalHeight,
+                    crossOrigin: true
+                });
+            }
+        } catch (error) {
+            console.warn('Failed to process image:', img.src, error);
+        }
+    }
+
+    // De-duplicate by comparing first 100 chars of dataURL
     const uniqueImagesMap = new Map();
-    images.forEach(img => {
-        if (!uniqueImagesMap.has(img.url)) {
-            uniqueImagesMap.set(img.url, img);
+    results.forEach(img => {
+        const key = img.url.substring(0, 100);
+        if (!uniqueImagesMap.has(key)) {
+            uniqueImagesMap.set(key, img);
         }
     });
     const uniqueImages = Array.from(uniqueImagesMap.values());
 
-    // Save to storage DIRECTLY from content script? No, content script has separate storage view often in older paradigms, 
-    // but in MV3 check permissions. Safest is send message to background.
-    chrome.runtime.sendMessage({ type: 'page_images_found', images: uniqueImages });
+    // Show alert to user (works in page context)
+    alert(`Found ${uniqueImages.length} images!\nClick the extension icon to process them.`);
 
-    // User feedback
-    alert(`Found ${uniqueImages.length} images!\nOpen the Beijing Food Menu extension icon to process them.`);
+    // Return images to background script
+    return uniqueImages;
 }
 
-// Background listener
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.type === 'page_images_found') {
-        chrome.storage.local.set({ pageImages: request.images });
-    }
-});
+

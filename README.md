@@ -1,6 +1,8 @@
 # Batch Image Processor
 
-A powerful, privacy-focused tool for batch image processing, editing, and optimization. Available as a **Web App** and **Browser Extension** (Chrome & Edge).
+A powerful, privacy-focused tool for batch image processing, editing, and optimization. Available as a **Web App** and **Browser Extension**.
+
+**[🌐 Web App](https://jiangmitravel.github.io/beijingfoodmenu-image-tools/)** | **[🛒 Chrome Web Store](https://chromewebstore.google.com/detail/batch-image-processor/imdnoejhpdnldanhpmniljcckpcbkhdj)** | **[📦 GitHub Repository](https://github.com/jiangmitravel/beijingfoodmenu-image-tools)**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Live Demo](https://img.shields.io/badge/demo-online-green.svg)](https://jiangmitravel.github.io/beijingfoodmenu-image-tools/)
@@ -31,8 +33,8 @@ The Browser Extension enhances your workflow by allowing you to collect images f
 [**Launch Web App**](https://jiangmitravel.github.io/beijingfoodmenu-image-tools/) — No installation required. Perfect for local files.
 
 ### 🧩 Browser Extension
-- **Chrome**: [Chrome Web Store](https://chrome.google.com/webstore) (Coming soon)
-- **Edge**: [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons) (Coming soon)
+
+**[⬇️ Install from Chrome Web Store](https://chromewebstore.google.com/detail/batch-image-processor/imdnoejhpdnldanhpmniljcckpcbkhdj)**
 
 Or build from source (see [BUILD.md](BUILD.md) for instructions).
 

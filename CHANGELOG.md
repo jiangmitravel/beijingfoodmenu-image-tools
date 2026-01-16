@@ -75,3 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 **Note**: This is the first public release of Batch Image Processor, developed by the Beijing Food Menu team for food photography optimization.
+
+### Known Limitations
+- **Cropping**: Only works with uploaded images. Web-grabbed images cannot be cropped due to browser CORS restrictions, but can still be processed (compressed, converted, resized).
+

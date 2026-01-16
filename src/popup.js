@@ -2,10 +2,6 @@
 
 // --- STATE ---
 let storedImages = [];
-let currentEditIndex = -1;
-let editCanvas = document.getElementById('editorCanvas');
-let editCtx = editCanvas ? editCanvas.getContext('2d') : null;
-let currentEditImage = null;
 let cropper = null; // Cropper.js instance
 
 // --- ICONS ---
@@ -27,7 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let isDirty = false;
     if (data.selectedImageUrl) {
         if (!isDuplicate(data.selectedImageUrl)) {
-            storedImages.push({ url: data.selectedImageUrl, name: 'captured_image' });
+            storedImages.push({ url: data.selectedImageUrl, name: 'captured_image', crossOrigin: false });
             isDirty = true;
         }
         chrome.storage.local.remove('selectedImageUrl');
@@ -44,7 +40,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     url,
                     name: 'batch_image',
                     width,
-                    height
+                    height,
+                    crossOrigin: typeof imgData === 'object' ? (imgData.crossOrigin || false) : false
                 });
             }
         });
@@ -56,11 +53,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderGallery();
 
     setupPresetListener();
-    setupEditorListeners();
     setupProcessingListeners();
     setupUploadListener();
     setupGalleryDelegation();
-    setupCropperListeners(); // New: Cropper functionality
+    setupCropperListeners(); // Cropper functionality
 });
 
 function isDuplicate(url) {
@@ -88,14 +84,26 @@ function renderGallery() {
     storedImages.forEach((img, idx) => {
         const div = document.createElement('div');
         div.className = 'grid-item';
+
+        // Add cross-origin badge if needed
+        const crossOriginBadge = img.crossOrigin
+            ? '<div style="position:absolute;top:5px;right:5px;background:rgba(255,140,0,0.9);color:white;padding:3px 6px;border-radius:3px;font-size:10px;font-weight:600;">Cross-Domain</div>'
+            : '';
+
+        // Edit button only for same-origin images
+        const editButton = img.crossOrigin
+            ? ''
+            : `<button class="action-icon edit-btn" data-index="${idx}" title="Edit">
+                    <img src="${SRC_EDIT}">
+                </button>`;
+
         // HTML Structure
         div.innerHTML = `
+            ${crossOriginBadge}
             <img class="thumb" src="${img.url}" id="img-${idx}">
             <div class="img-dims" id="dims-${idx}">...</div>
             <div class="grid-actions">
-                <button class="action-icon edit-btn" data-index="${idx}" title="Edit">
-                    <img src="${SRC_EDIT}">
-                </button>
+                ${editButton}
                 <button class="action-icon delete-btn" data-index="${idx}" title="Delete">
                     <img src="${SRC_DELETE}">
                 </button>
@@ -136,85 +144,7 @@ function setupGalleryDelegation() {
     };
 }
 
-function openEditor(idx) {
-    currentEditIndex = idx;
-    const imgData = storedImages[idx];
-    document.getElementById('editorOverlay').style.display = 'flex';
 
-    currentEditImage = new Image();
-    currentEditImage.onload = () => {
-        editCanvas.width = currentEditImage.width;
-        editCanvas.height = currentEditImage.height;
-        editCtx.drawImage(currentEditImage, 0, 0);
-    };
-    currentEditImage.src = imgData.url;
-}
-
-function setupEditorListeners() {
-    document.getElementById('closeEditor').onclick = () => {
-        document.getElementById('editorOverlay').style.display = 'none';
-    };
-
-    document.getElementById('rotateRight').onclick = () => rotateCanvas(90);
-    document.getElementById('rotateLeft').onclick = () => rotateCanvas(-90);
-    document.getElementById('cropSquare').onclick = () => cropCanvas(1);
-    document.getElementById('crop43').onclick = () => cropCanvas(4 / 3);
-
-    document.getElementById('saveEdit').onclick = () => {
-        const newUrl = editCanvas.toDataURL('image/png');
-        storedImages[currentEditIndex].url = newUrl;
-        storedImages[currentEditIndex].isEdited = true;
-        saveImages();
-        renderGallery();
-        document.getElementById('editorOverlay').style.display = 'none';
-    };
-}
-
-function rotateCanvas(deg) {
-    const temp = document.createElement('canvas');
-    const ctx = temp.getContext('2d');
-
-    if (Math.abs(deg) === 90) {
-        temp.width = editCanvas.height;
-        temp.height = editCanvas.width;
-    } else {
-        temp.width = editCanvas.width;
-        temp.height = editCanvas.height;
-    }
-
-    ctx.translate(temp.width / 2, temp.height / 2);
-    ctx.rotate(deg * Math.PI / 180);
-    ctx.drawImage(editCanvas, -editCanvas.width / 2, -editCanvas.height / 2);
-
-    editCanvas.width = temp.width;
-    editCanvas.height = temp.height;
-    editCtx.drawImage(temp, 0, 0);
-}
-
-function cropCanvas(ratio) {
-    const w = editCanvas.width;
-    const h = editCanvas.height;
-    const currentRatio = w / h;
-
-    let cropW, cropH, offsetX, offsetY;
-
-    if (currentRatio > ratio) {
-        cropH = h;
-        cropW = h * ratio;
-        offsetX = (w - cropW) / 2;
-        offsetY = 0;
-    } else {
-        cropW = w;
-        cropH = w / ratio;
-        offsetX = 0;
-        offsetY = (h - cropH) / 2;
-    }
-
-    const tempData = editCtx.getImageData(offsetX, offsetY, cropW, cropH);
-    editCanvas.width = cropW;
-    editCanvas.height = cropH;
-    editCtx.putImageData(tempData, 0, 0);
-}
 
 function deleteImage(idx) {
     storedImages.splice(idx, 1);
@@ -227,7 +157,7 @@ function setupUploadListener() {
     input.addEventListener('change', async (e) => {
         for (let file of e.target.files) {
             const url = await readFile(file);
-            storedImages.push({ url, name: file.name });
+            storedImages.push({ url, name: file.name, crossOrigin: false });
         }
         saveImages();
         renderGallery();
@@ -261,13 +191,33 @@ function setupProcessingListeners() {
             const processed = [];
             const total = storedImages.length;
 
+            // Check if there are any cross-origin images
+            const hasCrossOrigin = storedImages.some(img => img.crossOrigin);
+
             for (let i = 0; i < total; i++) {
                 btn.textContent = `Processing ${i + 1}/${total}...`;
 
                 try {
-                    const img = await processImage(storedImages[i].url, quality, format, resizeMode);
-                    const ext = format.split('/')[1];
-                    processed.push({ blob: img, name: `${prefix}_${i + 1}.${ext}` });
+                    const imgData = storedImages[i];
+
+                    // Cross-origin images: keep URL for direct download
+                    if (imgData.crossOrigin) {
+                        const ext = imgData.url.split('.').pop().split('?')[0] || 'jpg';
+                        processed.push({
+                            url: imgData.url,
+                            name: `${prefix}_${i + 1}.${ext}`,
+                            isCrossOrigin: true
+                        });
+                    } else {
+                        // Same-origin images: process normally
+                        const img = await processImage(imgData.url, quality, format, resizeMode);
+                        const ext = format.split('/')[1];
+                        processed.push({
+                            blob: img,
+                            name: `${prefix}_${i + 1}.${ext}`,
+                            isCrossOrigin: false
+                        });
+                    }
                 } catch (err) {
                     console.error(`Failed to process image ${i + 1}:`, err);
                 }
@@ -280,19 +230,33 @@ function setupProcessingListeners() {
 
             btn.textContent = 'Creating download...';
 
-            if (processed.length > 1) {
+            if (!hasCrossOrigin && processed.length > 1) {
+                // All same-origin: create ZIP
                 const zip = new JSZip();
                 processed.forEach(p => zip.file(p.name, p.blob));
                 const content = await zip.generateAsync({ type: "blob" });
                 const url = URL.createObjectURL(content);
                 chrome.downloads.download({ url, filename: `${prefix}_batch.zip`, saveAs: false });
-            } else {
+                alert(`Downloaded ${processed.length} images as ZIP.`);
+            } else if (!hasCrossOrigin && processed.length === 1) {
+                // Single same-origin image
                 const url = URL.createObjectURL(processed[0].blob);
                 chrome.downloads.download({ url, filename: processed[0].name, saveAs: false });
+            } else {
+                // Has cross-origin images: download individually
+                for (const p of processed) {
+                    if (p.isCrossOrigin) {
+                        chrome.downloads.download({ url: p.url, filename: p.name, saveAs: false });
+                    } else {
+                        const url = URL.createObjectURL(p.blob);
+                        chrome.downloads.download({ url, filename: p.name, saveAs: false });
+                    }
+                }
+                alert(`Downloaded ${processed.length} images individually (contains cross-domain images).`);
             }
 
             if (processed.length < total) {
-                alert(`Processed ${processed.length} of ${total} images. ${total - processed.length} failed.`);
+                alert(`Warning: ${total - processed.length} image(s) failed to process.`);
             }
 
         } catch (error) {
@@ -460,36 +424,58 @@ function openCropper(index) {
     currentCropIndex = index;
     const imgData = storedImages[index];
 
+    console.log('Opening cropper for:', imgData.url.substring(0, 50));
+
     const modal = document.getElementById('cropModal');
     const image = document.getElementById('cropImage');
 
-    image.src = imgData.url;
+    if (!modal || !image) {
+        console.error('Modal or image not found');
+        return;
+    }
+
     modal.style.display = 'flex';
 
-    // Destroy existing cropper if any
     if (cropper) {
         cropper.destroy();
         cropper = null;
     }
 
-    // Wait for image to load
+    // Don't set crossOrigin for data URLs
+    if (imgData.url.startsWith('data:')) {
+        image.removeAttribute('crossOrigin');
+    }
+
+    image.src = imgData.url;
+
     image.onload = () => {
-        cropper = new Cropper(image, {
-            aspectRatio: NaN,
-            viewMode: 1,
-            autoCropArea: 0.8,
-            responsive: true,
-            restore: false,
-            guides: true,
-            center: true,
-            highlight: true,
-            cropBoxMovable: true,
-            cropBoxResizable: true,
-            toggleDragModeOnDblclick: false
-        });
+        console.log('Image loaded, initializing cropper');
+        try {
+            cropper = new Cropper(image, {
+                aspectRatio: NaN,
+                viewMode: 1,
+                autoCropArea: 0.8,
+                responsive: true,
+                guides: true,
+                center: true,
+                highlight: true,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                background: false
+            });
+        } catch (error) {
+            console.error('Cropper error:', error);
+            alert('Failed to initialize cropper: ' + error.message);
+            closeCropper();
+        }
+    };
+
+    image.onerror = () => {
+        console.error('Image load failed');
+        alert('Failed to load image');
+        closeCropper();
     };
 }
-
 function closeCropper() {
     if (cropper) {
         cropper.destroy();
