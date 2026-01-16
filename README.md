@@ -16,7 +16,7 @@ A powerful, privacy-focused tool for batch image processing, editing, and optimi
 - **Flexible Naming**: Custom prefix, suffix, or sequential numbering.
 - **Metadata Removal**: Option to strip EXIF data for privacy.
 - **One-Click Presets**: Quickly switch between Social (1080p), Web (WebP), and Print settings.
-- **Built-in Editor**: Crop (Square/4:3) and Rotate images before processing.
+- **Built-in Editor**: Crop images with multiple aspect ratios (Free, 1:1, 4:3, 16:9, 3:2).
 
 ## 🧩 Browser Extension Features
 
